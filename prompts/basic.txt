@@ -1,0 +1,4 @@
+Extract the category, urgency, order ID, whether a refund was requested, and any amount mentioned from this customer complaint. Return JSON with the keys category, urgency, order_id, refund_requested, amount_mentioned.
+
+Complaint:
+{complaint}

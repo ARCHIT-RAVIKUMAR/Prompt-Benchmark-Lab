@@ -1,0 +1,13 @@
+Extract structured data from customer complaints. Reply with JSON only.
+
+Complaint: My headphones stopped charging after a month. Order #30412. Can you send a replacement?
+Output: {"category": "product_defect", "urgency": "medium", "order_id": "30412", "refund_requested": false, "amount_mentioned": null}
+
+Complaint: Just wanted to say the delivery guy left it in the rain, box was soaked but the item is fine. No action needed.
+Output: {"category": "delivery", "urgency": "low", "order_id": null, "refund_requested": false, "amount_mentioned": null}
+
+Complaint: I've been charged $59.00 for a subscription I cancelled in March. Ref ORD-1188. This is the second time I'm writing, refund me or I'll dispute it with my bank.
+Output: {"category": "billing", "urgency": "high", "order_id": "ORD-1188", "refund_requested": true, "amount_mentioned": 59.00}
+
+Complaint: {complaint}
+Output:
