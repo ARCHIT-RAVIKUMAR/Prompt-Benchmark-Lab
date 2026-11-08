@@ -1,0 +1,9 @@
+```json
+{
+  "category": "delivery delay",
+  "urgency": "low",
+  "order_id": "55102",
+  "refund_requested": false,
+  "amount_mentioned": null
+}
+```

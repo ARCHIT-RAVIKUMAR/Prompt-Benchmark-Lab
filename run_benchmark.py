@@ -1,29 +1,50 @@
 """Run every test case through every prompt N times and save the raw model output.
 
 Usage:
-    export ANTHROPIC_API_KEY=...
-    export BENCH_MODEL=claude-sonnet-5-5     # any model you want to test
+    export GROQ_API_KEY=...
+    export BENCH_MODEL=llama-3.3-70b-versatile    # any model id from console.groq.com
     python run_benchmark.py
 """
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
-import anthropic
+from groq import Groq, RateLimitError, APIConnectionError, InternalServerError
 
 ROOT = Path(__file__).parent
 RUNS = 3            # repeats per (prompt, case), needed for the consistency score
 TEMPERATURE = 0.7   # same for all prompts so the comparison is fair
-MODEL = os.environ.get("BENCH_MODEL", "claude-sonnet-5-5")
+MODEL = os.environ.get("BENCH_MODEL")
+if not MODEL:
+    raise SystemExit("Set BENCH_MODEL first. Run python list_models.py to see valid ids.")
 PROMPTS = ["basic", "fewshot", "instruction_heavy"]
+PAUSE = 20         # seconds between calls, keeps us under free-tier per-minute limits
+
+
+def call_model(client, prompt, tries=6):
+    for attempt in range(tries):
+        try:
+            resp = client.chat.completions.create(
+                model=MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=TEMPERATURE,
+                max_tokens=2000,
+            )
+            return resp.choices[0].message.content or ""
+        except (RateLimitError, APIConnectionError, InternalServerError) as e:  # only transient errors are retried
+            wait = 10 * (attempt + 1)
+            print(f"  {type(e).__name__}, retrying in {wait}s", file=sys.stderr)
+            time.sleep(wait)
+    raise RuntimeError("Gave up after repeated API errors; rerun to resume.")
 
 
 def main():
-    client = anthropic.Anthropic()
+    client = Groq()  # reads GROQ_API_KEY from the environment
     cases = json.loads((ROOT / "cases.json").read_text(encoding="utf-8"))
-    meta = {"model": MODEL, "temperature": TEMPERATURE, "runs": RUNS}
     (ROOT / "outputs").mkdir(exist_ok=True)
+    meta = {"provider": "groq", "model": MODEL, "temperature": TEMPERATURE, "runs": RUNS}
     (ROOT / "outputs" / "run_meta.json").write_text(json.dumps(meta, indent=2))
 
     for name in PROMPTS:
@@ -37,14 +58,9 @@ def main():
                 path = out_dir / f"{case['id']}_run{run}.txt"
                 if path.exists():
                     continue  # lets you resume after an interruption
-                resp = client.messages.create(
-                    model=MODEL,
-                    max_tokens=300,
-                    temperature=TEMPERATURE,
-                    messages=[{"role": "user", "content": prompt}],
-                )
-                path.write_text(resp.content[0].text, encoding="utf-8")
+                path.write_text(call_model(client, prompt), encoding="utf-8")
                 print(f"{name:18} {case['id']} run{run} done", file=sys.stderr)
+                time.sleep(PAUSE)
 
 
 if __name__ == "__main__":

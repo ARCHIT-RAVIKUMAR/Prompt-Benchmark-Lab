@@ -1,0 +1,9 @@
+```json
+{
+  "category": "billing",
+  "urgency": "normal",
+  "order_id": "INV-2290",
+  "refund_requested": true,
+  "amount_mentioned": "€120"
+}
+```

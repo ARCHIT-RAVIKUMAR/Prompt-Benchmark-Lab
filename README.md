@@ -28,12 +28,13 @@ ANALYSIS.md         conclusions
 ## Reproduce
 ```
 pip install -r requirements.txt
-export ANTHROPIC_API_KEY=your_key
-export BENCH_MODEL=claude-sonnet-5-5
+export GROQ_API_KEY=your_key
+python list_models.py                 # pick a model id from this list
+export BENCH_MODEL=<model id>
 python run_benchmark.py
 python score.py
 ```
-`run_meta.json` in `outputs/` records the model and temperature used. The runner skips files that already exist, so you can resume after an interruption.
+Model ids change over time, so check console.groq.com for the current list. `run_meta.json` in `outputs/` records the model and temperature used. The runner skips files that already exist, so you can resume after an interruption.
 
 ## Results
 See `results/results.md` and `ANALYSIS.md`.

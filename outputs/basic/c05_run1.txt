@@ -1,0 +1,9 @@
+```json
+{
+  "category": "Login Issue",
+  "urgency": "high",
+  "order_id": "90017",
+  "refund_requested": false,
+  "amount_mentioned": null
+}
+```

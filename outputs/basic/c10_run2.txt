@@ -1,0 +1,9 @@
+```json
+{
+  "category": "product safety",
+  "urgency": "high",
+  "order_id": "20458",
+  "refund_requested": true,
+  "amount_mentioned": null
+}
+```
